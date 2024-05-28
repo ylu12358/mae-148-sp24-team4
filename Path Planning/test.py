@@ -1,5 +1,6 @@
-from pathPlanning import np
+import numpy as np
 from pathPlanning import pathPlanning
+from functions import plotEnvironment
 
 # Define origin for local coordinates in WGS84 (GPS)
 #           LAT         LON         ALT
@@ -45,7 +46,10 @@ cardyn = {
 }
 
 # Run path planning function
-GPS_coords = pathPlanning(origin, pickup, dropoff, avoid, offset, cardyn)
+GPS_coords, sp_sol, local_coords, obst_coords = pathPlanning(origin, pickup, dropoff, avoid, offset, cardyn)
+
+# Plot
+plotEnvironment(pickup, dropoff, obst_coords, local_coords)
 
 # DIsplay final coordinates
 print(GPS_coords)

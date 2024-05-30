@@ -1,6 +1,7 @@
 import numpy as np
-from pathPlanning import pathPlanning
-from functions import plotEnvironment
+# from pathPlanning import pathPlanning
+# from functions import plotEnvironment
+from functions import checkCollision, plotEnvironment
 
 # Define origin for local coordinates in WGS84 (GPS)
 #           LAT         LON         ALT
@@ -22,7 +23,7 @@ dropoff = np.array([
 
 #Define center of each obstacle in local coordinates and the width and height of each obstacle (m)
 #     X   Y    W    H
-avoid = np.array([
+obstacle = np.array([
     [ 3,  4, 1.5, 1.5], 
     [ 3, 12, 2.5,   2],
     [ 4,  1,   3, 1.5],
@@ -46,10 +47,17 @@ cardyn = {
 }
 
 # Run path planning function
-GPS_coords, sp_sol, local_coords, obst_coords = pathPlanning(origin, pickup, dropoff, avoid, offset, cardyn)
+# GPS_coords, sp_sol, local_coords, obst_coords = pathPlanning(origin, pickup, dropoff, avoid, offset, cardyn)
 
 # Plot
-plotEnvironment(pickup, dropoff, obst_coords, local_coords)
+# plotEnvironment(pickup, dropoff, obst_coords, local_coords)
 
-# DIsplay final coordinates
-print(GPS_coords)
+# Display final coordinates
+# print(GPS_coords)
+
+
+
+# DELETE ME
+path = np.array([[0,0], [1,3]])
+print(checkCollision(obstacle[0, :], path))
+plotEnvironment(pickup, dropoff, obstacle, path)

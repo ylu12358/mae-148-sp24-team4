@@ -52,22 +52,22 @@ def pathPlanning(origin, pickup, dropoff, avoid, avoid_offset, cardyn):
                 local_temp = np.vstack((local_temp, dropoff[path_index[i-1], :]))
             
             # Define local path
-            local_x = local_temp[i+c, 0]
-            local_y = local_temp[i+c, 1]
-            local_x_before = local_temp[i+c-1, 0]
-            local_y_before = local_temp[i+c-1, 1]
+            loc_x = local_temp[i+c, 0]
+            loc_y = local_temp[i+c, 1]
+            loc_x_prev = local_temp[i+c-1, 0]
+            loc_y_prev = local_temp[i+c-1, 1]
 
             # Determine direction of travel
-            x_sign = local_x - local_x_before
-            y_sign = local_y - local_y_before
+            x_sign = np.sign(loc_x - loc_x_prev)
+            y_sign = np.sign(loc_y - loc_y_prev)
 
             # Determine x and y function of current path
             def fx(x):
-                result = (local_y - local_y_before) / (local_x - local_x_before) * (x - local_x_before) + local_y_before
+                result = (loc_y - loc_y_prev) / (loc_x - loc_x_prev) * (x - loc_x_prev) + loc_y_prev
                 return result
             
             def fy(y):
-                result = (local_x - local_x_before) / (local_y - local_y_before) * (y - local_y_before) + local_x_before
+                result = (loc_x - loc_x_prev) / (loc_y - loc_y_prev) * (y - loc_y_prev) + loc_x_prev
 
             # Sort the obstacles in order from closest to farthest on current path
             dist_dropoff_avoid = cdist(local_temp[i+c-1, :], avoid[:, 0:1])
@@ -82,7 +82,26 @@ def pathPlanning(origin, pickup, dropoff, avoid, avoid_offset, cardyn):
             dist_current = cdist(local_temp[i+c-1, :], local_temp[i+c, :])
 
             # Determine intersection points for each obstacle
-            for j in range
+            for j in range(0, avoid.shape[1]):
+                # Cases vary based on travel direction
+
+                # Right and up
+                if x_sign >= 0 and y_sign >= 0 and \
+                   loc_x_prev <= avoid_lines[2, 0, j] and loc_y_prev <= avoid_lines[2, 1, j] and \
+                   dist_current > dist_dropoff_avoid_main[j]:
+                    # Store obstacle corner coordinates
+                    obs_x = avoid_lines[0, :, j]
+                    obs_y = avoid_lines[0, 1, j]
+
+                    # Check if left intersection exists
+                    if fx(obs_x) >= obs_x and fx(obs_x) < 
+
+
+
+
+
+
+
             ##### FINISH MEEEEEEEEE from line 130 to 325
         
         # Determine total distance of current GPS path

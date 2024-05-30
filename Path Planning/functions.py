@@ -1,29 +1,22 @@
 import numpy as np
 
 
-def checkCollision(obstacle, path):
-    # Obstacle is a 4x2 array containing the XY coordinates of the obstacle
-    # Path is a 2x2 array containing the XY coordinates of the start and end points of the path
-
-    # Calculate and store X and Y signs
-    x_sign = 1 if path[0,0] < path[1,0] else -1
-    y_sign = 1 if path[0,1] < path[1,1] else -1
-
+def checkLineRect(obstacle, path):
     # Unpack obstacle and path
     nw, ne, sw, se = XYWHToCorners(*obstacle)
     a1, a2 = path
 
     # Check for side collisions
-    left = lineLineIntersect(a1, a2, nw, sw)
-    bottom = lineLineIntersect(a1, a2, sw, se)
-    right = lineLineIntersect(a1, a2, se, ne)
-    top = lineLineIntersect(a1, a2, ne, nw)
+    left = checkLineLine(a1, a2, nw, sw)
+    bottom = checkLineLine(a1, a2, sw, se)
+    right = checkLineLine(a1, a2, se, ne)
+    top = checkLineLine(a1, a2, ne, nw)
 
     # Return intersection
     return left or bottom or right or top
 
 
-def lineLineIntersect(a1, a2, b1, b2):
+def checkLineLine(a1, a2, b1, b2):
     # Unpack points
     a1x, a1y = a1
     a2x, a2y = a2
@@ -46,12 +39,11 @@ def XYWHToCorners(x, y, w, h):
     return nw, ne, sw, se
 
 
-def plotEnvironment(pickup, dropoff, obstacle, local):
+def plotEnvironment(pickup, dropoff, obstacle, path):
     # Import matplotlib
     import matplotlib.pyplot as plt
     
     # Establish variables for use in plotting
-    p = np.vstack((pickup, dropoff))
     colors = np.random.rand(len(dropoff) + 1, 3)
     plt.figure(1)
     ax = plt.gca()
@@ -69,14 +61,12 @@ def plotEnvironment(pickup, dropoff, obstacle, local):
         plt.fill(corners[:, 0], corners[:, 1], alpha=0.5)
 
     # Plot the pickup and drop off locations
+    plt.plot(pickup[0], pickup[1], '^', color=colors[0], linewidth=2)
     for i in range(len(dropoff)):
-        if i == 0:
-            plt.plot(p[i, 0], p[i, 1], '^', color=colors[i], linewidth=2)
-        else:
-            plt.plot(p[i, 0], p[i, 1], 'o', color=colors[i], linewidth=2)
+        plt.plot(dropoff[i, 0], dropoff[i, 1], 'o', color=colors[i+1], linewidth=2)
 
     # Plot the path lines
-    plt.plot(local[:, 0], local[:, 1], 'k--')
+    plt.plot(path[:, 0], path[:, 1], 'k--')
 
     # Graph formatting
     ax.set_aspect('equal', adjustable='box')
@@ -94,7 +84,7 @@ def paramInterp(local, cardyn):
     sp = CubicSpline(np.arange(local.shape[1]), local.T)
 
     # Define time steps
-    tstep = cardyn.dx / cardyn.vel_avg
+    tstep = cardyn['dx'] / cardyn['vel_avg']
     t = np.arange(0, sp.x[-1] + tstep, tstep)
 
     # Evaluate the spline at the given time steps

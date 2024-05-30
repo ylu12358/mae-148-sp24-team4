@@ -1,7 +1,6 @@
 import numpy as np
-# from pathPlanning import pathPlanning
-# from functions import plotEnvironment
-from functions import checkCollision, plotEnvironment
+from pathPlanning import pathPlanning
+from functions import plotEnvironment
 
 # Define origin for local coordinates in WGS84 (GPS)
 #           LAT         LON         ALT
@@ -47,17 +46,10 @@ cardyn = {
 }
 
 # Run path planning function
-# GPS_coords, sp_sol, local_coords, obst_coords = pathPlanning(origin, pickup, dropoff, avoid, offset, cardyn)
+GPS_coords, sp_sol, local_coords = pathPlanning(origin, pickup, dropoff, obstacle, offset, cardyn)
 
 # Plot
-# plotEnvironment(pickup, dropoff, obst_coords, local_coords)
+plotEnvironment(pickup, dropoff, obstacle, local_coords)
 
 # Display final coordinates
-# print(GPS_coords)
-
-
-
-# DELETE ME
-path = np.array([[0,0], [1,3]])
-print(checkCollision(obstacle[0, :], path))
-plotEnvironment(pickup, dropoff, obstacle, path)
+print(GPS_coords)

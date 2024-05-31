@@ -23,7 +23,7 @@ def correctCollisionsRecursive(path, obstacle):
             # Extract obstacle for this iteration
             obstacle_current = obstacle[j]
 
-            print(obstacle_current)
+            # print(obstacle_current)
 
             # Check if current path intersects with current obstacle
             intersects, reroute_corner = checkLineRect(obstacle_current, path_current)
@@ -84,7 +84,7 @@ def plotEnvironment(pickup, dropoff, obstacle, path, interp):
     plt.plot(path[:, 0], path[:, 1], 'k--')
 
     # Plot the spline
-    plt.plot(interp[0], interp[1])
+    plt.plot(interp[0], interp[1], 'r')
 
     # Graph formatting
     ax.set_aspect('equal', adjustable='box')
@@ -94,43 +94,59 @@ def plotEnvironment(pickup, dropoff, obstacle, path, interp):
     plt.show()
 
 
-def paramInterp(local, cardyn):
+def paramInterp(path, cardyn):
     # Import cubic spline library
     from scipy.interpolate import CubicSpline
 
-    # Create the cubic spline
-    sp = CubicSpline(np.arange(local.shape[1]), local.T)
+    # Separate x and y coordinates
+    x = path[:, 0]
+    y = path[:, 1]
 
-    # Define time steps
-    tstep = cardyn['dx'] / cardyn['vel_avg']
-    t = np.arange(0, sp.x[-1] + tstep, tstep)
+    # Define t parameter
+    t = np.arange(len(x))
 
-    # Evaluate the spline at the given time steps
-    sp_sol = sp(t).T
+    # Create cubic spline interpolation functions
+    sp_x = CubicSpline(t, x)
+    sp_y = CubicSpline(t, y)
 
-    return sp_sol
+    # Generate a smooth set of points
+    dt = cardyn['dx'] / cardyn['vel_avg']
+    t_fine = np.arange(0, len(x) - 1 + dt, dt)
+    x_smooth = sp_x(t_fine)
+    y_smooth = sp_y(t_fine)
+
+    # Combine into output variable
+    interp = np.vstack((x_smooth, y_smooth))
+
+    return interp
 
 
-def convertToWGS84(input_coords):
+def convertToWGS84(input_coords, origin):
     # Import conversion library
-    from pyproj import Transformer
+    from pyproj import Proj, Transformer
+    import numpy as np
 
-    # Transpose to get local
-    local = input_coords.T
+    # WGS84 coordinates of the local origin (latitude and longitude in degrees)
+    origin_lat = origin[0]
+    origin_lon = origin[1]
 
-    # Create a zero array for z
-    z = np.zeros((local.shape[1],))
+    # Local coordinates relative to the origin (in meters)
+    local_x = input_coords[0]
+    local_y = input_coords[1]
 
-    # Define the local coordinate system and WGS84 coordinate system
-    local_crs = 'epsg:32611'  # UTM Zone 11N
-    wgs84_crs = 'epsg:4326'  # WGS84
+    # Define the WGS84 coordinate system
+    wgs84_proj = Proj(proj='latlong', datum='WGS84')
 
-    # Create a transformer object
-    transformer = Transformer.from_crs(local_crs, wgs84_crs, always_xy=True)
+    # Define a local coordinate system with the origin at the WGS84 point
+    local_proj = Proj(proj="aeqd", datum='WGS84', lat_0=origin_lat, lon_0=origin_lon)
 
-    # Perform the transformation
-    lat, lon = transformer.transform(local[0], local[1])
-    alt = z  # Assuming altitude is zero for all points
+    # Create a transformer to convert from the local coordinate system to WGS84
+    transformer = Transformer.from_proj(local_proj, wgs84_proj, always_xy=True)
+
+    # Convert local coordinates to WGS84
+    lon, lat = transformer.transform(local_x, local_y)
+
+    alt = np.zeros_like(lon)  # Assuming altitude is zero for all points
 
     # Combine the results into GPS array
     GPS = np.vstack((lat, lon, alt)).T

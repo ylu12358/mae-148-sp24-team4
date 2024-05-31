@@ -43,9 +43,9 @@ def pathPlanning(origin, pickup, dropoff, obstacle, offset, cardyn):
     path_local = correctCollisions(path_local, obstacle, offset)
 
     # Parametric interpolation
-    sp_sol = paramInterp(path_local, cardyn)
+    interp = paramInterp(path_local, cardyn)
 
     # Convert coordinates to WGS84
-    GPS = convertToWGS84(sp_sol)
+    GPS = convertToWGS84(interp, origin)
 
-    return GPS, sp_sol, path_local
+    return GPS, interp, path_local

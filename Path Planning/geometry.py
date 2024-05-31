@@ -214,8 +214,3 @@ def calculateAngle(center, p1, p2):
     angle_deg = np.degrees(np.arccos(cos_theta))
 
     return angle_deg
-
-
-# obstacle = np.array([17, 9, 4.06, 5.06])
-# path = np.array([[19.03, 6.47], [18, 3]])
-# print(checkLineRect(obstacle, path))

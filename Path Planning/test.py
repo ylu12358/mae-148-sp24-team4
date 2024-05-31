@@ -3,11 +3,11 @@ from pathPlanning import pathPlanning
 from functions import plotEnvironment
 
 # Define origin for local coordinates in WGS84 (GPS)
-#           LAT         LON         ALT
-origin = np.array([32.881110, -117.235472, 10.0])
+#                   LAT         LON
+origin = np.array([32.881110, -117.235472])
 
 #Define pickup and drop off in local coordinates (m)
-#       X  Y
+#                  X  Y
 pickup = np.array([5, 15])
 
 dropoff = np.array([

@@ -1,42 +1,31 @@
 import numpy as np
+from geometry import checkLineRect, checkLineLine, convertXYWHtoCorners, offsetRectangle
 
 
-def checkLineRect(obstacle, path):
-    # Unpack obstacle and path
-    nw, ne, sw, se = XYWHToCorners(*obstacle)
-    a1, a2 = path
+def correctCollisions(path, obstacle, offset):
+    # Loop through every path segment
+    for i in range(len(path)-1):
+        # Add iterative counter
+        points_added = 0
 
-    # Check for side collisions
-    left = checkLineLine(a1, a2, nw, sw)
-    bottom = checkLineLine(a1, a2, sw, se)
-    right = checkLineLine(a1, a2, se, ne)
-    top = checkLineLine(a1, a2, ne, nw)
+        # Extract path for this iteration
+        path_current = path[i+points_added:i+2+points_added]
 
-    # Return intersection
-    return left or bottom or right or top
+        # Loop through every obstacle
+        for j in range(len(obstacle)):
+            # Extract obstacle for this iteration
+            obstacle_current = offsetRectangle(obstacle[j, :], offset)
+            # If path intersects this obstacle
+            intersection, nearest_corner = checkLineRect(obstacle_current, path_current)
+            if intersection:
+                # Iterate counter
+                points_added += 1
 
+                # Insert corner nearest to the intersection as an intermediate path point
+                return correctCollisions(np.vstack((path[:i+points_added], nearest_corner, path[i+points_added:])), obstacle, offset)
 
-def checkLineLine(a1, a2, b1, b2):
-    # Unpack points
-    a1x, a1y = a1
-    a2x, a2y = a2
-    b1x, b1y = b1
-    b2x, b2y = b2
-
-    # Calculate normalized distance ot intersection point
-    uA = ( (b2x-b1x) * (a1y-b1y) - (b2y-b1y) * (a1x-b1x) ) / ( (b2y-b1y) * (a2x-a1x) - (b2x-b1x) * (a2y-a1y) )
-    uB = ( (a2x-a1x) * (a1y-b1y) - (a2y-a1y) * (a1x-b1x) ) / ( (b2y-b1y) * (a2x-a1x) - (b2x-b1x) * (a2y-a1y) )
-
-    # Return intersection
-    return 0 <= uA <= 1 and 0 <= uB <= 1
-
-
-def XYWHToCorners(x, y, w, h):
-    nw = np.array([x - w/2, y + h/2])
-    ne = np.array([x + w/2, y + h/2])
-    sw = np.array([x - w/2, y - h/2])
-    se = np.array([x + w/2, y - h/2])
-    return nw, ne, sw, se
+    # Return path if no collisions found    
+    return path
 
 
 def plotEnvironment(pickup, dropoff, obstacle, path):
@@ -49,9 +38,9 @@ def plotEnvironment(pickup, dropoff, obstacle, path):
     ax = plt.gca()
 
     # Plot all avoidance objects
-    for i in range(obstacle.shape[0]):
+    for i in range(len(obstacle)):
         # Unpack corners of object
-        nw, ne, sw, se = XYWHToCorners(*obstacle[i, :])
+        nw, ne, sw, se = convertXYWHtoCorners(*obstacle[i, :])
 
         # Combine corners into one variable for plotting
         corners = np.array([nw, ne, se, sw, nw])
@@ -67,6 +56,9 @@ def plotEnvironment(pickup, dropoff, obstacle, path):
 
     # Plot the path lines
     plt.plot(path[:, 0], path[:, 1], 'k--')
+
+    # Plot the spline
+    
 
     # Graph formatting
     ax.set_aspect('equal', adjustable='box')

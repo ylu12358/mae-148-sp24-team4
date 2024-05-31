@@ -15,16 +15,18 @@ def pathPlanning(origin, pickup, dropoff, obstacle, offset, cardyn):
         # Store drop off order this iteration
         path_index = drop_perms[p, :]
 
+        # print(path_index)
+
         # Generate coordinate path
         path_temp = pickup
         c = 0
 
-        for i in range(1, len(dropoff)+1):
+        for i in range(1, len(dropoff)+2):
             # Add current dropoff point to temporary path
             path_temp = np.vstack((path_temp, pickup)) if i == len(dropoff)+1 else np.vstack((path_temp, dropoff[path_index[i-1], :]))
 
         # Fix obstacle collisions
-        path_temp = correctCollisions(path_temp, obstacle, offset)
+        # path_temp = correctCollisions(path_temp, obstacle, offset)
 
         # Determine total distance of current GPS path
         dist_total = 0
@@ -38,6 +40,7 @@ def pathPlanning(origin, pickup, dropoff, obstacle, offset, cardyn):
 
     # Save optimized path
     path_local = GPS_shortest
+    path_local = correctCollisions(path_local, obstacle, offset)
 
     # Parametric interpolation
     sp_sol = paramInterp(path_local, cardyn)

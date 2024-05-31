@@ -1,34 +1,60 @@
 import numpy as np
-from geometry import checkLineRect, checkLineLine, convertXYWHtoCorners, offsetRectangle
+from geometry import checkLineRect, convertXYWHtoCorners, offsetRectangle
 
 
 def correctCollisions(path, obstacle, offset):
+    obstacle_copy = np.copy(obstacle)
+    obstacle_offset = np.array([offsetRectangle(obstacle_current, offset) for obstacle_current in obstacle_copy])
+    return correctCollisionsRecursive(path, obstacle_offset)
+
+
+def correctCollisionsRecursive(path, obstacle):
+    # # Base case
+    # if isValidPath(path, obstacle):
+    #     return path
+
     # Loop through every path segment
     for i in range(len(path)-1):
-        # Add iterative counter
-        points_added = 0
-
         # Extract path for this iteration
-        path_current = path[i+points_added:i+2+points_added]
+        path_current = np.array([path[i], path[i + 1]])
 
         # Loop through every obstacle
         for j in range(len(obstacle)):
             # Extract obstacle for this iteration
-            obstacle_current = offsetRectangle(obstacle[j, :], offset)
-            # If path intersects this obstacle
-            intersection, nearest_corner = checkLineRect(obstacle_current, path_current)
-            if intersection:
-                # Iterate counter
-                points_added += 1
+            obstacle_current = obstacle[j]
 
-                # Insert corner nearest to the intersection as an intermediate path point
-                return correctCollisions(np.vstack((path[:i+points_added], nearest_corner, path[i+points_added:])), obstacle, offset)
+            print(obstacle_current)
+
+            # Check if current path intersects with current obstacle
+            intersects, reroute_corner = checkLineRect(obstacle_current, path_current)
+
+            # If an intersection is found, reroute the path
+            if intersects:
+                # Create a new path that goes around the obstacle
+                new_path = np.concatenate([path[:i + 1], [reroute_corner], path[i + 1:]])
+                
+                # Recursively find a valid path with the new path
+                result_path = correctCollisionsRecursive(new_path, obstacle)
+                
+                if result_path is not None:
+                    return result_path
 
     # Return path if no collisions found    
     return path
 
 
-def plotEnvironment(pickup, dropoff, obstacle, path):
+# def isValidPath(path, obstacle):
+#     # Check if the path intersects with any obstacles
+#     for i in range(len(path) - 1):
+#         path_current = np.array([path[i], path[i + 1]])
+#         for obstacle_current in obstacle:
+#             intersects, _ = checkLineRect(obstacle_current, path_current)
+#             if intersects:
+#                 return False
+#     return True
+
+
+def plotEnvironment(pickup, dropoff, obstacle, path, interp):
     # Import matplotlib
     import matplotlib.pyplot as plt
     
@@ -58,7 +84,7 @@ def plotEnvironment(pickup, dropoff, obstacle, path):
     plt.plot(path[:, 0], path[:, 1], 'k--')
 
     # Plot the spline
-    
+    plt.plot(interp[0], interp[1])
 
     # Graph formatting
     ax.set_aspect('equal', adjustable='box')

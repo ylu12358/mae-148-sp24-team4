@@ -46,10 +46,10 @@ cardyn = {
 }
 
 # Run path planning function
-GPS_coords, sp_sol, local_coords = pathPlanning(origin, pickup, dropoff, obstacle, offset, cardyn)
+GPS_coords, interp, path = pathPlanning(origin, pickup, dropoff, obstacle, offset, cardyn)
 
 # Plot
-plotEnvironment(pickup, dropoff, obstacle, local_coords)
+plotEnvironment(pickup, dropoff, obstacle, path, interp)
 
 # Display final coordinates
 print(GPS_coords)

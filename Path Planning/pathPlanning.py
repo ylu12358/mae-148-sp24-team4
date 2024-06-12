@@ -1,7 +1,7 @@
 import itertools
 import numpy as np
 from scipy.spatial.distance import cdist
-from functions import correctCollisions, paramInterp, convertToWGS84
+from functions import correctCollisions, paramInterp, convertToWGS84, convertToUTM
 
 def pathPlanning(origin, pickup, dropoff, obstacle, offset, cardyn):
     # Determine permutation of every drop off index
@@ -46,6 +46,7 @@ def pathPlanning(origin, pickup, dropoff, obstacle, offset, cardyn):
     interp = paramInterp(path_local, cardyn)
 
     # Convert coordinates to WGS84
-    GPS = convertToWGS84(interp, origin)
+    # GPS = convertToWGS84(interp, origin)
+    GPS = convertToUTM(interp, origin)
 
     return GPS, interp, path_local

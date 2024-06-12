@@ -54,14 +54,14 @@ def correctCollisionsRecursive(path, obstacle):
 #     return True
 
 
-def plotEnvironment(pickup, dropoff, obstacle, path, interp):
+def plotEnvironment(pickup, dropoff, obstacle, path, interp, GPS_coords):
     # Import matplotlib
     import matplotlib.pyplot as plt
     
     # Establish variables for use in plotting
     colors = np.random.rand(len(dropoff) + 1, 3)
-    plt.figure(1)
-    ax = plt.gca()
+    fig = plt.figure(1)
+    ax1 = fig.add_subplot(121)
 
     # Plot all avoidance objects
     for i in range(len(obstacle)):
@@ -72,25 +72,37 @@ def plotEnvironment(pickup, dropoff, obstacle, path, interp):
         corners = np.array([nw, ne, se, sw, nw])
 
         # Plot corners and fill rectangle
-        plt.plot(corners[:, 0], corners[:, 1])
-        plt.fill(corners[:, 0], corners[:, 1], alpha=0.5)
+        ax1.plot(corners[:, 0], corners[:, 1])
+        ax1.fill(corners[:, 0], corners[:, 1], alpha=0.5)
 
     # Plot the pickup and drop off locations
-    plt.plot(pickup[0], pickup[1], '^', color=colors[0], linewidth=2)
+    ax1.plot(pickup[0], pickup[1], '^', color=colors[0], linewidth=2)
     for i in range(len(dropoff)):
-        plt.plot(dropoff[i, 0], dropoff[i, 1], 'o', color=colors[i+1], linewidth=2)
+        ax1.plot(dropoff[i, 0], dropoff[i, 1], 'o', color=colors[i+1], linewidth=2)
 
     # Plot the path lines
-    plt.plot(path[:, 0], path[:, 1], 'k--')
+    ax1.plot(path[:, 0], path[:, 1], 'k--')
 
     # Plot the spline
-    plt.plot(interp[0], interp[1], 'r')
+    ax1.plot(interp[0], interp[1], 'r')
 
     # Graph formatting
-    ax.set_aspect('equal', adjustable='box')
-    plt.grid(True)
-    plt.xlabel('X')
-    plt.ylabel('Y')
+    ax1.set_aspect('equal', adjustable='box')
+    ax1.grid(True)
+    ax1.set_title('Obstacles and Path')
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Y')
+    
+    # Establish variables for use in plotting
+    ax2 = fig.add_subplot(122)
+    ax2.plot(GPS_coords[:, 0], GPS_coords[:, 1])
+
+    # Graph formatting
+    ax2.set_aspect('equal', adjustable='box')
+    ax2.grid(True)
+    ax2.set_title('UTM Converted, Normalized Points')
+    ax2.set_xlabel('X')
+    ax2.set_ylabel('Y')
     plt.show()
 
 
@@ -152,3 +164,39 @@ def convertToWGS84(input_coords, origin):
     GPS = np.vstack((lat, lon, alt)).T
 
     return GPS
+
+
+def convertToUTM(input_coords, origin):
+    # Import conversion library
+    from pyproj import Proj, Transformer
+    import numpy as np
+
+    # WGS84 coordinates of the local origin (latitude and longitude in degrees)
+    origin_lat = origin[0]
+    origin_lon = origin[1]
+
+    # Local coordinates relative to the origin (in meters)
+    local_x = input_coords[0]
+    local_y = input_coords[1]
+
+    # Define the WGS84 coordinate system
+    wgs84_proj = Proj(proj='latlong', datum='WGS84')
+
+    # Define the UTM coordinate system based on the origin's latitude and longitude
+    utm_proj = Proj(proj="utm", zone=int((origin_lon + 180) / 6) + 1, datum='WGS84')
+
+    # Define a local coordinate system with the origin at the WGS84 point
+    local_proj = Proj(proj="aeqd", datum='WGS84', lat_0=origin_lat, lon_0=origin_lon)
+
+    # Create a transformer to convert from the local coordinate system to UTM
+    transformer = Transformer.from_proj(local_proj, utm_proj, always_xy=True)
+
+    # Convert local coordinates to UTM
+    easting, northing = transformer.transform(local_x, local_y)
+
+    alt = np.zeros_like(easting)  # Assuming altitude is zero for all points
+
+    # Combine the results into UTM array
+    UTM = np.vstack((easting, northing, alt)).T
+
+    return UTM

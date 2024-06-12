@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.3.23)  4 JUN 2024 15:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.3.23)  4 JUN 2024 19:29
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -350,9 +350,9 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 57.
+(Font)              <7> on input line 53.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 57.
+(Font)              <5> on input line 53.
  [1
 
 {/usr/local/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (./nodes.aux)
@@ -362,15 +362,15 @@ L3 programming layer <2024-02-20>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 15182 strings out of 474116
- 338298 string characters out of 5743682
- 1941187 words of memory out of 5000000
- 37289 multiletter control sequences out of 15000+600000
+ 15310 strings out of 474116
+ 341542 string characters out of 5743682
+ 1952187 words of memory out of 5000000
+ 37417 multiletter control sequences out of 15000+600000
  558374 words of font info for 37 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 102i,15n,107p,504b,1016s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 102i,15n,107p,504b,1019s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb>
-Output written on nodes.pdf (1 page, 15240 bytes).
+Output written on nodes.pdf (1 page, 17522 bytes).
 PDF statistics:
  16 PDF objects out of 1000 (max. 8388607)
  10 compressed objects within 1 object stream

@@ -48,8 +48,16 @@ cardyn = {
 # Run path planning function
 GPS_coords, interp, path = pathPlanning(origin, pickup, dropoff, obstacle, offset, cardyn)
 
-# Plot
-plotEnvironment(pickup, dropoff, obstacle, path, interp)
-
 # Display final coordinates
-print(GPS_coords)
+ref_point = GPS_coords[0, :2]
+
+# Shift all points by subtracting the reference point
+GPS_coords_normalized = GPS_coords.copy()
+GPS_coords_normalized[:, 0] -= ref_point[0]
+GPS_coords_normalized[:, 1] -= ref_point[1]
+
+# Print to terminal
+print(GPS_coords_normalized)
+
+# Plot
+fig = plotEnvironment(pickup, dropoff, obstacle, path, interp, GPS_coords_normalized)

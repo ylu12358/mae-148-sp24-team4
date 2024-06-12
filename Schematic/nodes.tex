@@ -48,38 +48,68 @@
 
 
     % NODE DIAGRAM
-    \matrix[rosnode, below= 5cm of exampleA] (pathCreation) {
+    \matrix[rosnode, below right= 5cm of exampleC] (detection) {
+        detection node \\
+        \parbox{3.6cm}{Detects shapes, spits out a string corresponding to which dropoff locations need to be visited} \\
+    };
+
+    \matrix[rostopic, below= of detection] (dropoff) {
+        dropoff topic \\
+        String of dropoff locations \\
+    };
+
+    \matrix[rosnode, below= of dropoff] (pathCreation) {
         pathCreation node \\
     };
 
-    \matrix[rostopic, below= of pathCreation] (path) {
+    \matrix[rostopic, below left= of pathCreation] (path) {
         path topic \\
-        \parbox{5cm}{Contains csv file of GPS coordinates} \\
+        \parbox{3cm}{Contains csv file of GPS coordinates} \\
     };
 
-    \matrix[rosnode, below= of path] (vescProcessing) {
-        vescProcessing node \\
-        \parbox{5cm}{Takes in GPS coordinates, puts out necessary VESC twist values to reach next node} \\
+    \matrix[rostopic, right= of path] (status) {
+        status topic \\
+        \parbox{4cm}{Contains or doesn't contain signal that path creation is done} \\
     };
 
-    \matrix[rostopic, right= of vescProcessing] (GPSdata) {
+    \matrix[rosnode, below= of status] (donkeyProcessing) {
+        donkeyProcessing node \\
+        \parbox{4cm}{Starts donkeycar, resets the origin, sets mode to autosteer only} \\
+    };
+
+    \matrix[rosnode, left= of donkeyProcessing] (donkeycar) {
+        donkeycar "node" \\
+        Good ole donkeycar \\
+    };
+
+    \matrix[rosnode, left= of donkeycar] (throttleProcessing) {
+        throttleProcessing node \\
+        \parbox{4.5cm}{Takes in GPS data, calculates distance from current position to next dropoff point, sets donkeycar to either full auto or steering only (off)} \\
+    };
+
+    \matrix[rostopic, above= of throttleProcessing] (GPSdata) {
         GPSdata topic \\
-        \parbox{5cm}{Reports current GPS data} \\
+        Reports current GPS data \\
     };
 
-    \matrix[rostopic, below= of vescProcessing] (twist) {
-        twist topic \\
-    };
-
-    \matrix[rosnode, below= of twist] (vescTwist) {
-        vescTwist node \\
+    \matrix[rosnode, above= of GPSdata] (GPS) {
+        GPS node \\
+        \parbox{4cm}{Spits out serial data from GPS} \\
     };
     
+    \draw[->,orange,line width=1pt] (detection) -- (dropoff);
+    \draw[->,green,line width=1pt] (dropoff) -- (pathCreation);
     \draw[->,orange,line width=1pt] (pathCreation) -- (path);
-    \draw[->,green,line width=1pt] (path) -- (vescProcessing);
-    \draw[->,green,line width=1pt] (GPSdata) -- (vescProcessing);
-    \draw[->,orange,line width=1pt] (vescProcessing) -- (twist);
-    \draw[->,green,line width=1pt] (twist) -- (vescTwist);
+    \draw[->,orange,line width=1pt] (pathCreation) -- (status);
+    \draw[->,green,line width=1pt] (status) -- (donkeyProcessing);
+
+    \draw[->,blue,line width=1pt] (path) -- (donkeycar);
+    \draw[->,blue,line width=1pt] (donkeyProcessing) -- (donkeycar);
+    \draw[->,blue,line width=1pt] (throttleProcessing) -- (donkeycar);
+
+    \draw[->,orange,line width=1pt] (GPS) -- (GPSdata);
+    \draw[->,green,line width=1pt] (GPSdata) -- (throttleProcessing);
+    \draw[->,green,line width=1pt] (path) -- (throttleProcessing);
     
 \end{tikzpicture}
 \end{document}

@@ -48,7 +48,7 @@ cardyn = {
 # Run path planning function
 GPS_coords, interp, path = pathPlanning(origin, pickup, dropoff, obstacle, offset, cardyn)
 
-# Display final coordinates
+# Find first point
 ref_point = GPS_coords[0, :2]
 
 # Shift all points by subtracting the reference point

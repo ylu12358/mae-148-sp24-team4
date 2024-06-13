@@ -47,6 +47,14 @@ def pathPlanning(origin, pickup, dropoff, obstacle, offset, cardyn):
 
     # Convert coordinates to WGS84
     # GPS = convertToWGS84(interp, origin)
-    GPS = convertToUTM(interp, origin)
+    GPS_UTM = convertToUTM(interp, origin)
+
+    # Find first point
+    ref_point = GPS_UTM[0, :2]
+
+    # Shift all points by subtracting the reference point
+    GPS = GPS_UTM.copy()
+    GPS[:, 0] -= ref_point[0]
+    GPS[:, 1] -= ref_point[1]
 
     return GPS, interp, path_local

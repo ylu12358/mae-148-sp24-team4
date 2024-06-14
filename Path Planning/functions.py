@@ -54,14 +54,14 @@ def correctCollisionsRecursive(path, obstacle):
 #     return True
 
 
-def plotEnvironment(pickup, dropoff, obstacle, path, interp, GPS_coords):
+def plotEnvironment(pickup, dropoff, obstacle, path, interp, GPS_coords, GPS_coords_rot):
     # Import matplotlib
     import matplotlib.pyplot as plt
     
     # Establish variables for use in plotting
     colors = np.random.rand(len(dropoff) + 1, 3)
-    fig = plt.figure(1)
-    ax1 = fig.add_subplot(121)
+    fig = plt.figure(1,figsize=(15,6))
+    ax1 = fig.add_subplot(131)
 
     # Plot all avoidance objects
     for i in range(len(obstacle)):
@@ -89,26 +89,38 @@ def plotEnvironment(pickup, dropoff, obstacle, path, interp, GPS_coords):
     # Graph formatting
     ax1.set_aspect('equal', adjustable='box')
     ax1.grid(True)
-    ax1.set_title('Obstacles and Path')
+    ax1.set_title('Path with Obstacles')
     ax1.set_xlabel('X')
     ax1.set_ylabel('Y')
     
     # Establish variables for use in plotting
-    ax2 = fig.add_subplot(122)
+    ax2 = fig.add_subplot(132)
     ax2.plot(GPS_coords[:, 0], GPS_coords[:, 1])
 
     # Graph formatting
     ax2.set_aspect('equal', adjustable='box')
     ax2.grid(True)
-    ax2.set_title('UTM Converted, Normalized Points')
+    ax2.set_title('Interpolated, Normalized UTM Coordinates')
     ax2.set_xlabel('X')
     ax2.set_ylabel('Y')
+
+    # Establish variables for use in plotting
+    ax3 = fig.add_subplot(133)
+    ax3.plot(GPS_coords_rot[:, 0], GPS_coords_rot[:, 1], 'o')
+
+    # Graph formatting
+    ax3.set_aspect('equal', adjustable='box')
+    ax3.grid(True)
+    ax3.set_title('Adjusted for Heading')
+    ax3.set_xlabel('X')
+    ax3.set_ylabel('Y')
     plt.show()
 
 
 def paramInterp(path, cardyn):
     # Import cubic spline library
     from scipy.interpolate import CubicSpline
+    from scipy.spatial.distance import cdist
 
     # Separate x and y coordinates
     x = path[:, 0]
@@ -122,7 +134,7 @@ def paramInterp(path, cardyn):
     sp_y = CubicSpline(t, y)
 
     # Generate a smooth set of points
-    dt = cardyn['dx'] / cardyn['vel_avg']
+    dt = .01
     t_fine = np.arange(0, len(x) - 1 + dt, dt)
     x_smooth = sp_x(t_fine)
     y_smooth = sp_y(t_fine)
@@ -130,7 +142,18 @@ def paramInterp(path, cardyn):
     # Combine into output variable
     interp = np.vstack((x_smooth, y_smooth))
 
-    return interp
+    # Loop through and take points a certain distance apart
+    filtered = np.array((x[0], y[0]))
+    comparison = np.array((x[0], y[0]))
+
+    for i in range(interp.shape[1]):
+        point_curr = interp[:, i]
+        distance = cdist([point_curr], [comparison])
+        if distance > cardyn['dx']:
+            filtered = np.vstack((filtered, point_curr))
+            comparison = point_curr
+
+    return filtered
 
 
 def convertToWGS84(input_coords, origin):
@@ -176,8 +199,8 @@ def convertToUTM(input_coords, origin):
     origin_lon = origin[1]
 
     # Local coordinates relative to the origin (in meters)
-    local_x = input_coords[0]
-    local_y = input_coords[1]
+    local_x = input_coords[:, 0]
+    local_y = input_coords[:, 1]
 
     # Define the WGS84 coordinate system
     wgs84_proj = Proj(proj='latlong', datum='WGS84')
@@ -200,3 +223,19 @@ def convertToUTM(input_coords, origin):
     UTM = np.vstack((easting, northing, alt)).T
 
     return UTM
+
+
+def rotateOrigin(coords, angle_deg):
+    # Perform necessary conversions
+    angle = np.deg2rad(angle_deg)
+    coords_noalt_T = np.transpose(coords[:, :2])
+    # Define rotation matrix
+    rot = np.array([[np.cos(angle), np.sin(angle)],
+                    [-np.sin(angle), np.cos(angle)]])
+    
+    # Perform multiplication and reverse transpose
+    coords_rotated_noalt = np.matmul(rot, coords_noalt_T)
+    coords_rotated_noalt_T = np.transpose(coords_rotated_noalt)
+    coords_rotated_T = np.hstack((coords_rotated_noalt_T, np.reshape(coords[:, 2], (-1, 1))))
+    
+    return coords_rotated_T

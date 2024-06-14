@@ -1,5 +1,7 @@
-# mae-148-sp24-team4
- 
+# MAE 148 SP24 Team 4
+
+## Premise 
+
 ## Documentation
 Idk what else to put here
 
@@ -8,3 +10,4 @@ All parts modeled in Solidworks
 
 ## Schematic
 Generated using LaTeX
+![image](Schematic/schematic.png)

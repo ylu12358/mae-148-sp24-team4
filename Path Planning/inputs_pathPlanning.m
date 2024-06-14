@@ -50,12 +50,31 @@ cardyn.vave = 1;
 cardyn.dstep = 0.2;
 
 % Call the pathPlanning function to optimize the path
-GPS = pathPlanning(origin, pickup, dropoff, avoid, offset, cardyn)
+%GPS = pathPlanning(origin, pickup, dropoff, avoid, offset, cardyn)
 
 % Plot the track in the WGS84 frame
-zoomLevel = 20;
-player = geoplayer(GPS(1, 1), GPS(1, 2), zoomLevel);
-plotRoute(player, GPS(:, 1), GPS(:, 2));
+%zoomLevel = 20;
+%player = geoplayer(GPS(1, 1), GPS(1, 2), zoomLevel);
+%plotRoute(player, GPS(:, 1), GPS(:, 2));
+
+
+ang = 285;
+
+
+x = (0:0.1:10)';
+
+GPS = [x, x.^2];
+
+rot = [cosd(ang), sind(ang); -sind(ang), cosd(ang)];
+
+
+GPS_rot = rot*GPS';
+
+GPS_rot = GPS_rot';
+
+figure(1)
+plot(GPS(:, 1), GPS(:, 2), 'r', GPS_rot(:, 1), GPS_rot(:, 2), 'b')
+legend('Original', 'Rotated', 'Location', 'best')
 
 
 toc

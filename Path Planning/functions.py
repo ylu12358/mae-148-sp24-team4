@@ -86,6 +86,9 @@ def plotEnvironment(pickup, dropoff, obstacle, path, interp, GPS_coords, GPS_coo
     # Plot the spline
     ax1.plot(interp[0], interp[1], 'r')
 
+    # Tepmorary
+    #ax1.plot(GPS_coords[:, 0], GPS_coords[:, 1])
+
     # Graph formatting
     ax1.set_aspect('equal', adjustable='box')
     ax1.grid(True)
